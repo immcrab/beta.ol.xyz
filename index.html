@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OwenLee.XYZ | Beta Projects</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="resources/Images/favicon.png">
+    <style>
+        :root {
+            --accent: #c5ffea;
+            --bg: #1a1a1a;
+            --locked: #ff4b4b;
+        }
+
+        body {
+            font-family: 'Lilita One', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            background-image: radial-gradient(#333 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            padding: 120px 0 80px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            padding: 15px;
+            box-sizing: border-box;
+            z-index: 1000;
+            gap: 10px;
+        }
+
+        .auth-btn, .project-link {
+            font-family: 'Lilita One', sans-serif;
+            background: var(--accent);
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            transition: all 0.2s ease;
+            box-shadow: 4px 4px 0px #333;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .auth-btn:hover, .project-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 7px 7px 0px #000;
+            background: #ffffff;
+        }
+
+        .project-link.locked {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+            pointer-events: none;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 50px;
+            border: 2px solid var(--accent);
+        }
+
+        .user-info img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 10vw, 5rem);
+            margin: 20px 0;
+            text-transform: uppercase;
+            text-shadow: 6px 6px 0px var(--accent);
+            -webkit-text-stroke: 2px var(--accent);
+            color: transparent;
+            line-height: 0.9;
+        }
+
+        .status-banner {
+            background: var(--locked);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .project-card {
+            background: #252525;
+            padding: 40px 20px;
+            border-radius: 25px;
+            border: 3px solid var(--accent);
+            margin-top: 30px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+
+        p {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            color: #e2e2e2;
+            margin: 10px auto;
+        }
+
+        .back-link {
+            margin-top: 50px;
+            font-size: 1.5rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button id="loginBtn" class="auth-btn">GOOGLE LOGIN</button>
+        <div id="userInfo" class="user-info">
+            <img id="userPic" src="" alt="User">
+            <span id="userName" style="color: var(--accent);"></span>
+            <button id="logoutBtn" class="auth-btn" style="padding: 5px 10px; font-size: 0.8rem;">LOGOUT</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>My beta projects</h1>
+
+        <div id="loginAlert" class="status-banner">
+            Please sign in to open projects!
+        </div>
+
+        <!-- <div class="project-card">
+            <h2 style="font-size: 2.5rem; color: var(--accent); margin: 0;">PROJECT NAME</h2>
+            <p style="color: var(--accent);">Status: 50% Done</p>
+            <p>Description.</p>
+            <a href="beta.owenlee.xyz/PROJECT-NAME" class="project-link locked">Open Project →</a>
+        </div> -->
+
+        <div>
+            <h2>I havent made any projects yet!</h1>
+        </div>
+
+        <a href="https://owenlee.xyz" class="back-link">← Return to Main Page</a>
+        <p style="font-size: 1rem; color: #666; margin-top: 40px;">© 2026 OwenLee.XYZ</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4ajU8m2BwQuURWAEg77KWECpa1i7VM6c",
+            authDomain: "owenleexyz-api.firebaseapp.com",
+            projectId: "owenleexyz-api",
+            storageBucket: "owenleexyz-api.firebasestorage.app",
+            messagingSenderId: "616093813686",
+            appId: "1:616093813686:web:b244e945a87143c09ccf17"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        const userPic = document.getElementById('userPic');
+        
+        const loginAlert = document.getElementById('loginAlert');
+        const projectLinks = document.querySelectorAll('.project-link');
+
+        loginBtn.addEventListener('click', () => {
+            signInWithPopup(auth, provider).catch((err) => console.error(err));
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginBtn.style.display = 'none';
+                userInfo.style.display = 'flex';
+                userName.innerText = user.displayName.split(' ')[0];
+                userPic.src = user.photoURL;
+                
+                loginAlert.style.display = 'none';
+                
+                projectLinks.forEach(link => {
+                    link.classList.remove('locked');
+                    link.innerText = "View Project →";
+                });
+            } else {
+                loginBtn.style.display = 'block';
+                userInfo.style.display = 'none';
+                loginAlert.style.display = 'block';
+                
+                projectLinks.forEach(link => {
+                    link.classList.add('locked');
+                    link.innerText = "Locked 🔒";
+                });
+            }
+        });
+    </script>
+</body>
+</html>
