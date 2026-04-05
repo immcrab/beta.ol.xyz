@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OwenLee.XYZ | Live Skeleton</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@
         body {
             font-family: 'Lilita One', sans-serif;
             margin: 0;
-            padding: 100px 20px 80px 20px;
+            padding: 20px;
             background-color: #1a1a1a;
             background-image: radial-gradient(#333 1px, transparent 1px);
             background-size: 40px 40px;
@@ -26,17 +26,15 @@
             min-height: 100vh;
             overflow-x: hidden;
             text-align: center;
+            box-sizing: border-box;
         }
 
         .nav-bar {
-            position: fixed;
-            top: 0;
-            right: 0;
-            padding: 20px;
-            z-index: 1000;
+            width: 100%;
             display: flex;
-            align-items: center;
-            gap: 15px;
+            justify-content: flex-end;
+            padding: 10px;
+            margin-bottom: 10px;
         }
 
         .auth-btn {
@@ -47,22 +45,15 @@
             padding: 10px 20px;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1rem;
             transition: all 0.2s ease;
             box-shadow: 4px 4px 0px #333;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .auth-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 6px 6px 0px #333;
-            background: #ffffff;
-        }
-
-        .auth-btn:disabled {
-            background: #444;
-            color: #888;
-            cursor: not-allowed;
-            box-shadow: none;
+        .auth-btn:active {
+            transform: translateY(2px);
+            box-shadow: 2px 2px 0px #333;
         }
 
         .user-info {
@@ -82,26 +73,26 @@
         }
 
         h1 {
-            font-size: clamp(30px, 6vw, 80px);
-            margin: 10px 0;
+            font-size: clamp(28px, 8vw, 60px);
+            margin: 5px 0;
             text-transform: uppercase;
-            text-shadow: 4px 4px 0px #c5ffea;
-            -webkit-text-stroke: 1.5px #c5ffea;
+            text-shadow: 3px 3px 0px #c5ffea;
+            -webkit-text-stroke: 1px #c5ffea;
             color: transparent;
-            letter-spacing: 2px;
         }
 
         #canvasContainer {
             position: relative;
-            width: 90vw;
-            max-width: 800px;
-            aspect-ratio: 16/9;
+            width: 100%;
+            max-width: 600px;
+            /* Height will be set by JS to match aspect ratio */
             border: 4px solid #c5ffea;
             border-radius: 20px;
-            margin-top: 20px;
+            margin-top: 15px;
             overflow: hidden;
-            box-shadow: 10px 10px 0px #333;
+            box-shadow: 8px 8px 0px #333;
             background: #000;
+            line-height: 0;
         }
 
         video, canvas {
@@ -113,63 +104,74 @@
             object-fit: cover;
         }
 
+        /* Mirror effect for front camera */
+        #video, #canvas {
+            transform: scaleX(-1);
+        }
+
         #loadingOverlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(26, 26, 26, 0.9);
+            background: rgba(26, 26, 26, 0.95);
             color: #c5ffea;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5em;
             z-index: 999;
             flex-direction: column;
         }
 
         .controls {
-            margin-top: 30px;
+            margin-top: 25px;
+            width: 100%;
         }
 
         .ender {
-            font-size: 1.1rem;
+            font-size: 0.8rem;
             color: #666;
-            margin-top: 50px;
-            letter-spacing: 2px;
+            margin-top: auto;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 480px) {
+            #canvasContainer {
+                aspect-ratio: 3/4; /* Better for portrait mobile */
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="nav-bar">
-        <button id="loginBtn" class="auth-btn">LOGIN / SIGN UP</button>
+        <button id="loginBtn" class="auth-btn">LOGIN</button>
         <div id="userInfo" class="user-info">
             <img id="userPic" src="" alt="User">
             <span id="userName" style="color: #c5ffea;"></span>
-            <button id="logoutBtn" class="auth-btn" style="padding: 5px 10px; font-size: 0.8rem;">LOGOUT</button>
+            <button id="logoutBtn" class="auth-btn" style="padding: 5px 10px; font-size: 0.7rem; margin-left: 5px;">EXIT</button>
         </div>
     </div>
 
-    <h5 style="font-size: 1rem; color: #666; margin-bottom: 0;">AI EXPERIMENT v1.0.8</h5>
+    <h5 style="font-size: 0.8rem; color: #666; margin: 0;">AI EXPERIMENT v1.0.9</h5>
     <h1>Live Skeleton</h1>
 
     <div id="canvasContainer">
         <video id="video" autoplay playsinline muted></video>
         <canvas id="canvas"></canvas>
         <div id="loadingOverlay">
-            <span>INITIALIZING MODELS...</span>
+            <span id="loadStatus">INITIALIZING...</span>
         </div>
     </div>
 
     <div class="controls">
-        <button id="startStopBtn" class="auth-btn" style="font-size: 1.5rem; padding: 15px 40px;" disabled>
-            LOADING AI...
+        <button id="startStopBtn" class="auth-btn" style="font-size: 1.2rem; width: 80%; max-width: 300px;" disabled>
+            LOCKED
         </button>
     </div>
 
-    <p class="ender">© 2026 OwenLee.XYZ | Powered by TensorFlow.js</p>
+    <p class="ender">© 2026 OwenLee.XYZ</p>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -193,6 +195,7 @@
         const userInfo = document.getElementById('userInfo');
         const userName = document.getElementById('userName');
         const userPic = document.getElementById('userPic');
+        const loadStatus = document.getElementById('loadStatus');
 
         loginBtn.onclick = () => signInWithPopup(auth, provider);
         logoutBtn.onclick = () => signOut(auth);
@@ -203,9 +206,14 @@
                 userInfo.style.display = 'flex';
                 userName.innerText = user.displayName.split(' ')[0];
                 userPic.src = user.photoURL;
+                window.initAI(); 
             } else {
                 loginBtn.style.display = 'block';
                 userInfo.style.display = 'none';
+                loadStatus.innerText = "PLEASE LOG IN";
+                document.getElementById('loadingOverlay').style.display = 'flex';
+                document.getElementById('startStopBtn').innerText = "LOCKED";
+                document.getElementById('startStopBtn').disabled = true;
             }
         });
     </script>
@@ -216,21 +224,29 @@
         const ctx = canvas.getContext("2d");
         const startStopBtn = document.getElementById("startStopBtn");
         const loadingOverlay = document.getElementById("loadingOverlay");
+        const loadStatus = document.getElementById("loadStatus");
 
         let detector;
         let isStreaming = false;
         let stream;
-        let prevPose = null;
+        let animationFrameId;
 
-        async function initAI() {
-            await tf.ready();
-            detector = await poseDetection.createDetector(
-                poseDetection.SupportedModels.MoveNet, 
-                { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
-            );
-            loadingOverlay.style.display = 'none';
-            startStopBtn.disabled = false;
-            startStopBtn.innerText = "START CAMERA";
+        window.initAI = async function() {
+            try {
+                loadStatus.innerText = "LOADING MODEL...";
+                await tf.ready();
+                // MoveNet is great for mobile, but 'lite' is even faster
+                detector = await poseDetection.createDetector(
+                    poseDetection.SupportedModels.MoveNet, 
+                    { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
+                );
+                loadingOverlay.style.display = 'none';
+                startStopBtn.disabled = false;
+                startStopBtn.innerText = "START CAMERA";
+            } catch (e) {
+                loadStatus.innerText = "ERROR LOADING AI";
+                console.error(e);
+            }
         }
 
         function drawConnections(poseMap) {
@@ -241,8 +257,8 @@
                 ['left_hip','left_knee'],['left_knee','left_ankle'],['right_hip','right_knee'],['right_knee','right_ankle']
             ];
 
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = '#c5ffea'; // Owen's signature mint
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#c5ffea';
             ctx.lineCap = 'round';
 
             bodyPairs.forEach(([a, b]) => {
@@ -260,61 +276,72 @@
         async function render() {
             if (!isStreaming) return;
             
-            const poses = await detector.estimatePoses(video);
+            const poses = await detector.estimatePoses(video, {
+                flipHorizontal: false // We flip via CSS for better performance
+            });
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (poses.length > 0) {
                 let poseMap = {};
-                poses[0].keypoints.forEach((k, i) => {
-                    // Simple smoothing
-                    if (prevPose && prevPose[i]) {
-                        k.x = prevPose[i].x * 0.4 + k.x * 0.6;
-                        k.y = prevPose[i].y * 0.4 + k.y * 0.6;
-                    }
+                poses[0].keypoints.forEach(k => {
                     poseMap[k.name] = k;
-                });
-                prevPose = poses[0].keypoints;
-
-                drawConnections(poseMap);
-                
-                // Draw dots
-                poses[0].keypoints.forEach(p => {
-                    if (p.score > 0.3) {
+                    if (k.score > 0.3) {
                         ctx.beginPath();
-                        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+                        ctx.arc(k.x, k.y, 5, 0, Math.PI * 2);
                         ctx.fillStyle = '#ffffff';
                         ctx.fill();
                         ctx.strokeStyle = '#c5ffea';
                         ctx.stroke();
                     }
                 });
+                drawConnections(poseMap);
             }
-            requestAnimationFrame(render);
+            animationFrameId = requestAnimationFrame(render);
         }
 
         startStopBtn.onclick = async () => {
             if (isStreaming) {
-                stream.getTracks().forEach(t => t.stop());
+                cancelAnimationFrame(animationFrameId);
+                if(stream) stream.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
                 isStreaming = false;
                 startStopBtn.innerText = "START CAMERA";
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
             } else {
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    // Mobile-friendly constraints
+                    const constraints = { 
+                        video: { 
+                            facingMode: "user",
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        } 
+                    };
+                    
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
                     video.srcObject = stream;
+                    
                     video.onloadedmetadata = () => {
+                        video.play();
+                        // Adjust canvas to match video stream exactly
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
+                        
+                        // Adjust container aspect ratio
+                        const container = document.getElementById('canvasContainer');
+                        container.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
+                        
+                        isStreaming = true;
+                        render();
+                        startStopBtn.innerText = "STOP CAMERA";
                     };
-                    isStreaming = true;
-                    render();
-                    startStopBtn.innerText = "STOP CAMERA";
                 } catch (err) {
-                    alert("Camera blocked!");
+                    console.error(err);
+                    alert("Camera error: Please ensure you are on HTTPS and have granted permissions.");
                 }
             }
         };
-
-        initAI();
     </script>
 </body>
 </html>
