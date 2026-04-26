@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OwenLee.XYZ | Live Skeleton</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
+    <style>
+        body {
+            font-family: 'Lilita One', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            background-image: radial-gradient(#333 1px, transparent 1px);
+            background-size: 40px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .nav-bar {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .auth-btn {
+            font-family: 'Lilita One', sans-serif;
+            background: #c5ffea;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-shadow: 4px 4px 0px #333;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .auth-btn:active {
+            transform: translateY(2px);
+            box-shadow: 2px 2px 0px #333;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 50px;
+            border: 1px solid #c5ffea;
+        }
+
+        .user-info img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+
+        h1 {
+            font-size: clamp(28px, 8vw, 60px);
+            margin: 5px 0;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0px #c5ffea;
+            -webkit-text-stroke: 1px #c5ffea;
+            color: transparent;
+        }
+
+        #canvasContainer {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            border: 4px solid #c5ffea;
+            border-radius: 20px;
+            margin-top: 15px;
+            overflow: hidden;
+            box-shadow: 8px 8px 0px #333;
+            background: #000;
+            line-height: 0;
+        }
+
+        video, canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #video, #canvas {
+            transform: scaleX(-1);
+        }
+
+        #loadingOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 26, 0.95);
+            color: #c5ffea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .controls {
+            margin-top: 25px;
+            width: 100%;
+        }
+
+        .ender {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: auto;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 480px) {
+            #canvasContainer {
+                aspect-ratio: 3/4;
+            }
+        }
+
+        /* Uiverse.io by Novaxlo */
+        .earth-loader {
+            --watercolor: #3344c1;
+            --landcolor: #7cc133;
+            width: 7.5em;
+            height: 7.5em;
+            background-color: var(--watercolor);
+            position: relative;
+            overflow: hidden;
+            border-radius: 50%;
+            box-shadow:
+                inset 0em 0.5em rgb(255, 255, 255, 0.25),
+                inset 0em -0.5em rgb(0, 0, 0, 0.25);
+            border: solid 0.15em white;
+            animation: startround 1s;
+            animation-iteration-count: 1;
+        }
+
+        .earth-loader svg {
+            fill: var(--landcolor);
+        }
+
+        .earth-loader svg:nth-child(1) {
+            position: absolute;
+            bottom: -2em;
+            width: 7em;
+            height: auto;
+            animation: round1 5s infinite linear 0.75s;
+        }
+
+        .earth-loader svg:nth-child(2) {
+            position: absolute;
+            top: -3em;
+            width: 7em;
+            height: auto;
+            animation: round1 5s infinite linear;
+        }
+
+        .earth-loader svg:nth-child(3) {
+            position: absolute;
+            top: -2.5em;
+            width: 7em;
+            height: auto;
+            animation: round2 5s infinite linear;
+        }
+
+        .earth-loader svg:nth-child(4) {
+            position: absolute;
+            bottom: -2.2em;
+            width: 7em;
+            height: auto;
+            animation: round2 5s infinite linear 0.75s;
+        }
+
+        @keyframes startround {
+            0% { filter: brightness(500%); box-shadow: none; }
+            75% { filter: brightness(500%); box-shadow: none; }
+            100% { 
+                filter: brightness(100%); 
+                box-shadow: inset 0em 0.5em rgb(255, 255, 255, 0.25), inset 0em -0.5em rgb(0, 0, 0, 0.25);
+            }
+        }
+
+        @keyframes round1 {
+            0% { left: -2em; opacity: 1; transform: skewX(0deg) rotate(0deg); }
+            30% { left: -6em; opacity: 1; transform: skewX(-25deg) rotate(25deg); }
+            31% { left: -6em; opacity: 0; transform: skewX(-25deg) rotate(25deg); }
+            35% { left: 7em; opacity: 0; transform: skewX(25deg) rotate(-25deg); }
+            45% { left: 7em; opacity: 1; transform: skewX(25deg) rotate(-25deg); }
+            100% { left: -2em; opacity: 1; transform: skewX(0deg) rotate(0deg); }
+        }
+
+        @keyframes round2 {
+            0% { left: 5em; opacity: 1; transform: skewX(0deg) rotate(0deg); }
+            75% { left: -7em; opacity: 1; transform: skewX(-25deg) rotate(25deg); }
+            76% { left: -7em; opacity: 0; transform: skewX(-25deg) rotate(25deg); }
+            77% { left: 8em; opacity: 0; transform: skewX(25deg) rotate(-25deg); }
+            80% { left: 8em; opacity: 1; transform: skewX(25deg) rotate(-25deg); }
+            100% { left: 5em; opacity: 1; transform: skewX(0deg) rotate(0deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button id="loginBtn" class="auth-btn">LOGIN</button>
+        <div id="userInfo" class="user-info">
+            <img id="userPic" src="" alt="User">
+            <span id="userName" style="color: #c5ffea;"></span>
+            <button id="logoutBtn" class="auth-btn" style="padding: 5px 10px; font-size: 0.7rem; margin-left: 5px;">EXIT</button>
+        </div>
+    </div>
+
+    <h5 style="font-size: 0.8rem; color: #666; margin: 0;">AI EXPERIMENT v1.0.9</h5>
+    <h1>Live Skeleton</h1>
+
+    <div id="canvasContainer">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="canvas"></canvas>
+        <div id="loadingOverlay">
+            <div class="earth-loader">
+                <svg viewBox="0 0 100 100"><path d="M20,40 Q40,10 70,30 T90,60 T50,90 T10,60 Z"></path></svg>
+                <svg viewBox="0 0 100 100"><path d="M10,30 Q30,50 60,20 T90,40 T70,80 T20,70 Z"></path></svg>
+                <svg viewBox="0 0 100 100"><path d="M30,10 Q50,30 20,60 T40,90 T80,50 T60,10 Z"></path></svg>
+                <svg viewBox="0 0 100 100"><path d="M50,20 Q80,40 50,70 T20,40 T50,20 Z"></path></svg>
+            </div>
+            <span id="loadStatus">INITIALIZING...</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="startStopBtn" class="auth-btn" style="font-size: 1.2rem; width: 80%; max-width: 300px;" disabled>
+            LOCKED
+        </button>
+    </div>
+
+    <p class="ender">© 2026 OwenLee.XYZ</p>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4ajU8m2BwQuURWAEg77KWECpa1i7VM6c",
+            authDomain: "owenleexyz-api.firebaseapp.com",
+            projectId: "owenleexyz-api",
+            storageBucket: "owenleexyz-api.firebasestorage.app",
+            messagingSenderId: "616093813686",
+            appId: "1:616093813686:web:b244e945a87143c09ccf17"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        const userPic = document.getElementById('userPic');
+        const loadStatus = document.getElementById('loadStatus');
+
+        loginBtn.onclick = () => signInWithPopup(auth, provider);
+        logoutBtn.onclick = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginBtn.style.display = 'none';
+                userInfo.style.display = 'flex';
+                userName.innerText = user.displayName.split(' ')[0];
+                userPic.src = user.photoURL;
+                window.initAI(); 
+            } else {
+                loginBtn.style.display = 'block';
+                userInfo.style.display = 'none';
+                loadStatus.innerText = "PLEASE LOG IN";
+                document.getElementById('loadingOverlay').style.display = 'flex';
+                document.getElementById('startStopBtn').innerText = "LOCKED";
+                document.getElementById('startStopBtn').disabled = true;
+            }
+        });
+    </script>
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const startStopBtn = document.getElementById("startStopBtn");
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        const loadStatus = document.getElementById("loadStatus");
+
+        let detector;
+        let isStreaming = false;
+        let stream;
+        let animationFrameId;
+
+        window.initAI = async function() {
+            try {
+                loadStatus.innerText = "LOADING MODEL...";
+                
+                const randomTime = Math.floor(Math.random() * (5000 - 3000 + 1)) + 3000;
+                const timerPromise = new Promise(resolve => setTimeout(resolve, randomTime));
+
+                await tf.ready();
+                const detectorPromise = poseDetection.createDetector(
+                    poseDetection.SupportedModels.MoveNet, 
+                    { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
+                );
+
+                const [detResult] = await Promise.all([detectorPromise, timerPromise]);
+                detector = detResult;
+
+                loadingOverlay.style.display = 'none';
+                startStopBtn.disabled = false;
+                startStopBtn.innerText = "START CAMERA";
+            } catch (e) {
+                loadStatus.innerText = "ERROR LOADING AI";
+                console.error(e);
+            }
+        }
+
+        function drawConnections(poseMap) {
+            const bodyPairs = [
+                ['left_shoulder','right_shoulder'],['left_shoulder','left_elbow'],['left_elbow','left_wrist'],
+                ['right_shoulder','right_elbow'],['right_elbow','right_wrist'],
+                ['left_hip','right_hip'],['left_shoulder','left_hip'],['right_shoulder','right_hip'],
+                ['left_hip','left_knee'],['left_knee','left_ankle'],['right_hip','right_knee'],['right_knee','right_ankle']
+            ];
+
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#c5ffea';
+            ctx.lineCap = 'round';
+
+            bodyPairs.forEach(([a, b]) => {
+                const p1 = poseMap[a];
+                const p2 = poseMap[b];
+                if (p1 && p2 && p1.score > 0.3 && p2.score > 0.3) {
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            });
+        }
+
+        async function render() {
+            if (!isStreaming) return;
+            
+            const poses = await detector.estimatePoses(video, {
+                flipHorizontal: false 
+            });
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (poses.length > 0) {
+                let poseMap = {};
+                poses[0].keypoints.forEach(k => {
+                    poseMap[k.name] = k;
+                    if (k.score > 0.3) {
+                        ctx.beginPath();
+                        ctx.arc(k.x, k.y, 5, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fill();
+                        ctx.strokeStyle = '#c5ffea';
+                        ctx.stroke();
+                    }
+                });
+                drawConnections(poseMap);
+            }
+            animationFrameId = requestAnimationFrame(render);
+        }
+
+        startStopBtn.onclick = async () => {
+            if (isStreaming) {
+                cancelAnimationFrame(animationFrameId);
+                if(stream) stream.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
+                isStreaming = false;
+                startStopBtn.innerText = "START CAMERA";
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            } else {
+                try {
+                    const constraints = { 
+                        video: { 
+                            facingMode: "user",
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        } 
+                    };
+                    
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        
+                        const container = document.getElementById('canvasContainer');
+                        container.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
+                        
+                        isStreaming = true;
+                        render();
+                        startStopBtn.innerText = "STOP CAMERA";
+                    };
+                } catch (err) {
+                    console.error(err);
+                    alert("Camera error: Please ensure you are on HTTPS and have granted permissions.");
+                }
+            }
+        };
+    </script>
+</body>
+</html>
