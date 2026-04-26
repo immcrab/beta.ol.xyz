@@ -433,5 +433,16 @@
             }
         };
     </script>
+    
+    <script>
+        // Initialize Devlog System
+        const devlogScript = document.createElement('script');
+        devlogScript.src = '/devlog/devlog.js';
+        devlogScript.onload = () => {
+            DevlogSystem.init();
+            DevlogSystem.addDevlogButtonToNav();
+        };
+        document.head.appendChild(devlogScript);
+    </script>
 </body>
 </html>
